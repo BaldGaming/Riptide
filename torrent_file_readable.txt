@@ -1,0 +1,12 @@
+d
+	8:announce		33:http://192.168.1.135:6969/annouce
+	10:created by	18:qBittorrent v5.1.4
+	13:creation datei1772807605e
+	4:info
+		d
+			6:length		i3046e
+			4:name			11:Lorem Ipsum
+			12:piece length	i16384e
+			6:pieces		20:h¨nMeüœRE{Y³w¦Y<ò
+		e
+e

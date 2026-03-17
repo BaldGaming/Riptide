@@ -2,58 +2,83 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System;
+using System.IO;
+
 
 public class Bencode
 {
-    private readonly BinaryReader _reader;
-
     public Bencode(Stream stream)
     {
-        // BinaryReader is like C's fread()—it handles the stream for us.
-        _reader = new BinaryReader(stream);
     }
 
     public object Decode()
     {
-        // PeekChar is like checking the first byte of a buffer
-        char peek = (char)_reader.PeekChar();
-
-        return peek switch
-        {
-            'd' => DecodeDictionary(),
-            'l' => DecodeList(),
-            'i' => DecodeInteger(),
-            _   => DecodeString() // Strings start with a number (e.g., 4:spam)
-        };
     }
 
     private Dictionary<string, object> DecodeDictionary()
     {
-        _reader.ReadChar(); // Pop the 'd'
-        var dict = new Dictionary<string, object>();
-        while ((char)_reader.PeekChar() != 'e')
-        {
-            // BitTorrent dictionaries always have strings as keys
-            string key = Encoding.UTF8.GetString((byte[])DecodeString());
-            object value = Decode();
-            dict[key] = value;
-        }
-        _reader.ReadChar(); // Pop the 'e'
-        return dict;
     }
 
-    private byte[] DecodeString()
+    // Function for decoding arrays
+    private static byte[] DecodeByteArray(IEnumerator<byte> enumerator)
     {
-        // Find the colon (like searching for a char in a C array)
-        string lengthStr = "";
-        char c;
-        while ((c = _reader.ReadChar()) != ':')
+        // Creates a dynamic collection for the length characters
+        List<byte> lengthBytes = new List<byte>();
+        
+        // Loop continuously adds the current byte to the list until it reaches ":".
+        do
         {
-            lengthStr += c;
+            if (enumerator.Current == (byte)':')
+                break;
+
+            lengthBytes.Add(enumerator.Current);
         }
-        int length = int.Parse(lengthStr);
-        return _reader.ReadBytes(length);
+        while (enumerator.MoveNext());
+
+        // Converts lengthBytes to a string, then parse it into an integer.
+        string lengthString = Encoding.UTF8.GetString(lengthBytes.ToArray());
+        int length = int.Parse(lengthString);
+
+        // Creates the final size byte array using the length.
+        byte[] bytes = new byte[length];
+
+        // Loops exactly 'length' times.
+        for (int i = 0; length > i; i++)
+        {
+            enumerator.MoveNext();
+            bytes[i] = enumerator.Current;
+        } 
+        
+        // Return the filled byte array
+        return bytes;
     }
 
-    // TODO: Add DecodeInteger and DecodeList
+    // Function for decoding integers
+    private static long DecodeInteger(IEnumerator<byte> enumerator)
+    {
+        // Creates a dynamic collection to hold the bytes we read
+        List<byte> numberBytes = new List<byte>();
+
+        // loop that continuously advances the enumerator
+        while (enumerator.MoveNext())
+        {
+            // Checks if the current byte is the end marker: (byte)'e'
+            if (enumerator.Current == (byte)'e')
+                break; // Breaks because we've hit the end of the integer
+
+            // Otherwise, adds the current byte (enumerator.Current) to your list.
+            numberBytes.Add(enumerator.Current);
+        }
+
+        // Converts the list of bytes into a string.
+        string convertedText = Encoding.UTF8.GetString(numberBytes.ToArray());
+
+        // Parse said string into a long int and return it.
+        return Int64.Parse(convertedText);
+    }
+
+    private List<object> DecodeList()
+    {
+    }
 }
