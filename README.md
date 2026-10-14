@@ -1,6 +1,6 @@
 # Riptide — A BitTorrent Client Built from Scratch
 
-<img width="728" height="400" alt="Riptide Terminal Output" src="https://via.placeholder.com/728x400.png?text=Riptide+Screenshot+Here" />
+<img width="728" height="400" alt="Riptide Terminal Output" src="https://via.placeholder.com/728x400.png?text=Need+to+add+screenshot+:P" />
 
 ## About The Project
 Riptide is a fully functional BitTorrent client built entirely from scratch in C#. 
